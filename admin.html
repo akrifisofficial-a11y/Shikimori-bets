@@ -2,25 +2,48 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Админка</title>
   <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-  <div class="container admin-container">
-    <h1>Добавить аниме</h1>
+  <div class="container admin-container" id="admin-content" style="display:none;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+      <h1>Добавить аниме</h1>
+      <button class="btn btn-danger" onclick="logout()">Выйти</button>
+    </div>
 
-    <input type="text" id="shiki_url" placeholder="Ссылка Shikimori: https://shikimori.one/animes/60427">
+    <input type="text" id="shiki_url" placeholder="Ссылка Shikimori: https://shikimori.io/animes/60427">
     <input type="text" id="shiki_id" placeholder="ID" readonly>
-    <button id="load-btn">Загрузить с Shikimori</button>
+    <button id="load-btn" class="btn btn-secondary">Загрузить с Shikimori</button>
 
     <input type="text" id="title" placeholder="Название">
     <input type="text" id="cover" placeholder="Обложка">
     <input type="text" id="genres" placeholder="Жанры через запятую">
     <textarea id="description" placeholder="Описание"></textarea>
 
-    <button id="save-btn">Сохранить</button>
+    <button id="save-btn" class="btn btn-primary">Сохранить</button>
     <div id="msg"></div>
   </div>
+
+  <div id="no-access" style="display:none; text-align:center; padding:60px;">
+    <h2>Доступ запрещён</h2>
+    <p>У тебя нет прав администратора</p>
+    <a href="/" class="btn btn-primary" style="margin-top:20px;">На главную</a>
+  </div>
+
+  <script src="auth.js"></script>
   <script src="admin.js"></script>
+
+  <script>
+    checkAdmin().then(isAdmin => {
+      if (isAdmin) {
+        document.getElementById('admin-content').style.display = 'block';
+      } else {
+        document.getElementById('no-access').style.display = 'block';
+      }
+    });
+  </script>
 </body>
 </html>
