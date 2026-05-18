@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Аниме</title>
   <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
   <header>
@@ -15,21 +16,21 @@
 
   <main class="container">
     <div id="loading">Загрузка...</div>
-    
+
     <div id="anime-content" class="anime-content" style="display:none;">
       <div class="anime-poster">
         <img id="anime-cover" src="" alt="">
       </div>
-      
+
       <div class="anime-details">
         <h1 id="anime-title"></h1>
         <div id="anime-genres" class="genres"></div>
-        
+
         <div class="action-buttons">
           <a id="shiki-link" class="btn btn-primary" target="_blank">Открыть на Shikimori</a>
           <a id="player-link" class="btn btn-secondary" target="_blank">Смотреть плеер</a>
         </div>
-        
+
         <div class="description-block">
           <h3>Описание</h3>
           <p id="anime-description"></p>
