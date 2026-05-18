@@ -2,40 +2,45 @@ const SUPABASE_URL = 'https://твой-project.supabase.co';
 const SUPABASE_KEY = 'твой-anon-key';
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const id = new URLSearchParams(location.search).get('id');
+document.getElementById('load-btn').onclick = loadFromShiki;
+document.getElementById('save-btn').onclick = saveAnime;
 
-document.addEventListener('DOMContentLoaded', loadAnime);
+function loadFromShiki() {
+  const url = document.getElementById('shiki_url').value;
+  const match = url.match(/animes\/(\d+)/);
+  if (!match) return alert('Неверная ссылка');
 
-async function loadAnime() {
-  try {
-    const { data: [anime], error } = await supabase
-    .from('anime')
-    .select('*')
-    .eq('id', id)
-    .single();
+  const id = match[1];
+  document.getElementById('shiki_id').value = id;
 
-    if (error ||!anime) {
-      document.getElementById('loading').textContent = 'Аниме не найдено';
-      return;
-    }
+  fetch(`https://shikimori.one/api/animes/${id}`)
+.then(r => r.json())
+.then(d => {
+    document.getElementById('title').value = d.russian || d.name;
+    document.getElementById('cover').value = `https://shikimori.one${d.image.original}`;
+    document.getElementById('genres').value = d.genres.map(g => g.russian).join(', ');
+    document.getElementById('description').value = d.description_html?.replace(/<[^>]*>/g, '') || '';
+    document.getElementById('save-btn').dataset.slug = d.url.replace('/animes/', '');
+  })
+.catch(() => alert('Не удалось загрузить данные'));
+}
 
-    document.title = anime.title;
+async function saveAnime() {
+  const { data: { session } = await supabase.auth.getSession();
+  if (!session) return alert('Не авторизован');
 
-    document.getElementById('anime-cover').src = anime.cover;
-    document.getElementById('anime-cover').alt = anime.title;
-    document.getElementById('anime-title').textContent = anime.title;
-    document.getElementById('anime-genres').textContent = anime.genres?.join(', ');
-    document.getElementById('anime-description').textContent = anime.description || 'Описание отсутствует';
+  const body = {
+    title: document.getElementById('title').value,
+    shiki_id: document.getElementById('shiki_id').value,
+    slug: document.getElementById('save-btn').dataset.slug,
+    cover: document.getElementById('cover').value,
+    genres: document.getElementById('genres').value.split(',').map(s => s.trim()),
+    description: document.getElementById('description').value
+  };
 
-    const shikiUrl = `https://shikimori.io/animes/${anime.slug}`;
-    document.getElementById('shiki-link').href = shikiUrl;
-    document.getElementById('player-link').href = `${shikiUrl}/watch`;
+  if (!body.slug ||!body.title) return alert('Заполни все поля');
 
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('anime-content').style.display = 'flex';
+  const { error } = await supabase.from('anime').insert(body);
 
-  } catch (e) {
-    document.getElementById('loading').textContent = 'Ошибка загрузки';
-    console.error(e);
-  }
+  document.getElementById('msg').textContent = error? 'Ошибка: ' + error.message : 'Сохранено!';
 }
